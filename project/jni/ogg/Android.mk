@@ -2,21 +2,10 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+ECHO := $(shell wget -nc https://github.com/FluidSynth/fluidsynth/releases/download/v2.2.2/fluidsynth-2.2.2-android.zip; unzip -n fluidsynth-2.2.2-android.zip *libogg.so -d $(LOCAL_PATH); )
+
 LOCAL_MODULE := ogg
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
-LOCAL_CFLAGS := -O3
+LOCAL_SRC_FILES := lib/$(TARGET_ARCH_ABI)/libogg.so
 
-
-LOCAL_CPP_EXTENSION := .cpp
-
-LOCAL_SRC_FILES := $(addprefix src/, $(notdir $(wildcard $(LOCAL_PATH)/src/*.c) $(wildcard $(LOCAL_PATH)/src/*.cpp)))
-
-LOCAL_STATIC_LIBRARIES := 
-
-LOCAL_SHARED_LIBRARIES := 
-
-LOCAL_LDLIBS :=
-
-include $(BUILD_STATIC_LIBRARY)
-
+include $(PREBUILT_SHARED_LIBRARY)

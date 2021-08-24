@@ -2,22 +2,15 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+ECHO := $(shell wget -nc https://github.com/FluidSynth/fluidsynth/releases/download/v2.2.2/fluidsynth-2.2.2-android.zip; unzip -n fluidsynth-2.2.2-android.zip *libfluidsynth.so -d $(LOCAL_PATH); )
+
 LOCAL_MODULE := fluidsynth
 
-APP_SUBDIRS := $(patsubst $(LOCAL_PATH)/%, %, $(shell find $(LOCAL_PATH)/src -type d))
+LOCAL_SRC_FILES := lib/$(TARGET_ARCH_ABI)/libfluidsynth.so
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/include
 
-LOCAL_C_INCLUDES := $(foreach D, $(APP_SUBDIRS), $(LOCAL_PATH)/$(D)) $(LOCAL_PATH)/include $(LOCAL_PATH)/../sdl-$(SDL_VERSION)/include
-LOCAL_CFLAGS := -O3 -DHAVE_CONFIG_H -include stdint.h -Werror=implicit
-
-LOCAL_CPP_EXTENSION := .cpp
-
-LOCAL_SRC_FILES := $(foreach F, $(APP_SUBDIRS), $(addprefix $(F)/,$(notdir $(wildcard $(LOCAL_PATH)/$(F)/*.cpp))))
-LOCAL_SRC_FILES += $(foreach F, $(APP_SUBDIRS), $(addprefix $(F)/,$(notdir $(wildcard $(LOCAL_PATH)/$(F)/*.c))))
-
-LOCAL_SHARED_LIBRARIES := sdl-$(SDL_VERSION)
+LOCAL_SHARED_LIBRARIES := oboe glib-2.0 gthread-2.0 gobject-2.0 sndfile instpatch-1.0
 
 LOCAL_STATIC_LIBRARIES := 
 
-LOCAL_LDLIBS := 
-
-include $(BUILD_SHARED_LIBRARY)
+include $(PREBUILT_SHARED_LIBRARY)
