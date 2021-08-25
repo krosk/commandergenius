@@ -12,9 +12,8 @@ fi
 echo Generating data.zip
 mkdir -p AndroidData
 cd simutrans/simutrans
+[ -e music/TimGM6mb.sf2 ] || wget https://sourceforge.net/p/mscore/code/HEAD/tree/trunk/mscore/share/sound/TimGM6mb.sf2?format=raw -O music/TimGM6mb.sf2
 rm -f ../../AndroidData/data.zip
 zip -r -0 ../../AndroidData/data.zip * >/dev/null
 cd ../..
 echo Generating data.zip done
-
-[ -e AndroidData/TimGM6mb.sf2 ] || wget https://sourceforge.net/p/mscore/code/HEAD/tree/trunk/mscore/share/sound/TimGM6mb.sf2?format=raw -O AndroidData/TimGM6mb.sf2
