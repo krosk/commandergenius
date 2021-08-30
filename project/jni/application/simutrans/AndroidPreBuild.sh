@@ -16,6 +16,7 @@ cd simutrans
 [ -e simutrans/pak64.german ] || (wget --show-progress -nc http://simutrans-germany.com/pak.german/pak64.german_0-122-0-0-2_full.zip && unzip -n pak64.german_0-122-0-0-2_full.zip)
 cd simutrans
 [ -e music/TimGM6mb.sf2 ] || wget -nc --show-progress https://sourceforge.net/p/mscore/code/HEAD/tree/trunk/mscore/share/sound/TimGM6mb.sf2?format=raw -O music/TimGM6mb.sf2
+[ -e cacert.pem ] || cp ./../../cacert.pem ./cacert.pem
 rm -f ../../AndroidData/data.zip
 zip -r -0 ../../AndroidData/data.zip * >/dev/null
 cd ../..
