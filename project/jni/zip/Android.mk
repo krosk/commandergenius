@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-ECHO := $(shell wget -nc https://github.com/krosk/libzip-android/releases/download/CI/libzip-android-all-ci.zip; unzip -n libzip-android-all-ci.zip -d $(LOCAL_PATH); )
+ECHO := $(shell wget -nc https://github.com/krosk/libzip-android/releases/download/Android-1.2.0/libzip-android-all-1.2.0.zip; unzip -n libzip-android-all-1.2.0.zip -d $(LOCAL_PATH); )
 
 LOCAL_MODULE := zip
 
