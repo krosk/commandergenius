@@ -12,6 +12,8 @@ fi
 [ ! -e simutrans/android/add_assets.sh ] || (cd simutrans/android; ./add_assets.sh; cd ../..)
 echo Generating data.zip
 mkdir -p AndroidData
-rm -f AndroidData/data.zip
-zip -r -0 AndroidData/data.zip * >/dev/null
+cd simutrans/simutrans
+rm -f ../../AndroidData/data.zip
+zip -r -0 ../../AndroidData/data.zip * >/dev/null
+cd ../..
 echo Generating data.zip done
