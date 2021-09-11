@@ -9,17 +9,9 @@ else
 	cd ..
 fi
 
+[ ! -e simutrans/android/add_assets.sh ] || (cd simutrans/android; ./add_assets.sh; cd ../..)
 echo Generating data.zip
 mkdir -p AndroidData
-cd simutrans
-[ -e simutrans/pak ] || (wget --show-progress -nc https://downloads.sourceforge.net/project/simutrans/pak64/122-0/simupak64-122-0.zip && unzip -n simupak64-122-0.zip)
-[ -e simutrans/pak64.german ] || (wget --show-progress -nc http://simutrans-germany.com/pak.german/pak64.german_0-122-0-0-2_full.zip && unzip -n pak64.german_0-122-0-0-2_full.zip)
-cd simutrans
-[ -e music/TimGM6mb.sf2 ] || wget -nc --show-progress https://sourceforge.net/p/mscore/code/HEAD/tree/trunk/mscore/share/sound/TimGM6mb.sf2?format=raw -O music/TimGM6mb.sf2
-[ -e font/RobotoCondensed-Regular.ttf ] || (wget -nc --show-progress https://fonts.google.com/download?family=Roboto%20Condensed -O Roboto_Condensed.zip && unzip -n Roboto_Condensed.zip -d font)
-[ -e font/Roboto-Regular.ttf ] || (wget -nc --show-progress https://fonts.google.com/download?family=Roboto -O Roboto.zip && unzip -n Roboto.zip -d font)
-[ -e cacert.pem ] || cp ./../../cacert.pem ./cacert.pem
-rm -f ../../AndroidData/data.zip
-zip -r -0 ../../AndroidData/data.zip * >/dev/null
-cd ../..
+rm -f AndroidData/data.zip
+zip -r -0 AndroidData/data.zip * >/dev/null
 echo Generating data.zip done
