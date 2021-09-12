@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-ECHO := $(shell wget -nc https://github.com/krosk/openssl-android/releases/download/Android-latest/libopenssl-android-all-latest.zip && unzip -n libopenssl-android-all-latest.zip -d $(LOCAL_PATH) )
+ECHO := $(shell wget -nc https://github.com/krosk/openssl-android/releases/download/Android-1.1.1j/libopenssl-android-all-1.1.1j.zip && unzip -n libopenssl-android-all-1.1.1j.zip -d $(LOCAL_PATH) )
 
 LOCAL_MODULE := $(notdir $(LOCAL_PATH))
 
