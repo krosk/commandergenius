@@ -9,7 +9,7 @@ else
 	cd ..
 fi
 
-[ ! -e simutrans/android/add_assets.sh ] || (cd simutrans/android; ./add_assets.sh; cd ../..)
+[ ! -e simutrans/android/add_assets.sh ] || (cd simutrans/android && ./add_assets.sh && cd ../..) || exit 1
 echo Generating data.zip
 mkdir -p AndroidData
 cd simutrans/simutrans
