@@ -40,6 +40,11 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass c
     //exit(status);
 }
 
+extern void SDL_Android_Init(JNIEnv* env, jclass cls);
+void SDL_Android_Init(JNIEnv* env, jclass cls)
+{
+}
+
 #endif /* __ANDROID__ */
 
 /* vi: set ts=4 sw=4 expandtab: */

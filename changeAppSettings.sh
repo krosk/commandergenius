@@ -861,7 +861,14 @@ cd ../..
 
 # In case we use SDL2 let simlink the SDLActivity source file
 if [ "$LibSdlVersion" = "2.0" ] ; then
-	ln -s ../jni/sdl-2.0/android-project/src/org/libsdl/app/SDLActivity.java project/src/SDLActivity.java
+	ln -s ../jni/sdl-2.0/android-project/app/src/main/java/org/libsdl/app/SDLActivity.java project/src/SDLActivity.java
+	ln -s ../jni/sdl-2.0/android-project/app/src/main/java/org/libsdl/app/SDL.java project/src/SDL.java
+	ln -s ../jni/sdl-2.0/android-project/app/src/main/java/org/libsdl/app/SDLAudioManager.java project/src/SDLAudioManager.java
+	ln -s ../jni/sdl-2.0/android-project/app/src/main/java/org/libsdl/app/SDLControllerManager.java project/src/SDLControllerManager.java
+	ln -s ../jni/sdl-2.0/android-project/app/src/main/java/org/libsdl/app/HIDDevice.java project/src/HIDDevice.java
+	ln -s ../jni/sdl-2.0/android-project/app/src/main/java/org/libsdl/app/HIDDeviceBLESteamController.java project/src/HIDDeviceBLESteamController.java
+	ln -s ../jni/sdl-2.0/android-project/app/src/main/java/org/libsdl/app/HIDDeviceManager.java project/src/HIDDeviceManager.java
+	ln -s ../jni/sdl-2.0/android-project/app/src/main/java/org/libsdl/app/HIDDeviceUSB.java project/src/HIDDeviceUSB.java
 fi
 
 

@@ -8,7 +8,8 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := SDL2
+#LOCAL_MODULE := SDL2
+LOCAL_MODULE := sdl-2.0
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 
@@ -57,7 +58,7 @@ LOCAL_SRC_FILES := \
 	$(wildcard $(LOCAL_PATH)/src/video/yuv2rgb/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/test/*.c))
 
-LOCAL_SHARED_LIBRARIES := hidapi
+#LOCAL_SHARED_LIBRARIES := hidapi
 
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES
 LOCAL_CFLAGS += \
@@ -86,7 +87,7 @@ ifeq ($(NDK_DEBUG),1)
     cmd-strip :=
 endif
 
-LOCAL_STATIC_LIBRARIES := cpufeatures
+LOCAL_STATIC_LIBRARIES := cpufeatures hidapi
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -136,7 +137,7 @@ LOCAL_SRC_FILES := src/hidapi/android/hid.cpp
 LOCAL_MODULE := libhidapi
 LOCAL_LDLIBS := -llog
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)
 
 $(call import-module,android/cpufeatures)
 
