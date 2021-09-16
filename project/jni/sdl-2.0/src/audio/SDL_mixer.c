@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2021 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_config.h"
+#include "../SDL_internal.h"
 
 /* This provides the default mixing callback for the SDL audio routines */
 
@@ -98,11 +98,6 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
 
     case AUDIO_U8:
         {
-#if defined(__GNUC__) && defined(__M68000__) && !defined(__mcoldfire__) && defined(SDL_ASSEMBLY_ROUTINES)
-            SDL_MixAudio_m68k_U8((char *) dst, (char *) src,
-                                 (unsigned long) len, (long) volume,
-                                 (char *) mix8);
-#else
             Uint8 src_sample;
 
             while (len--) {
@@ -112,7 +107,6 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
                 ++dst;
                 ++src;
             }
-#endif
         }
         break;
 
@@ -172,10 +166,6 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
 
     case AUDIO_S16MSB:
         {
-#if defined(__GNUC__) && defined(__M68000__) && !defined(__mcoldfire__) && defined(SDL_ASSEMBLY_ROUTINES)
-            SDL_MixAudio_m68k_S16MSB((short *) dst, (short *) src,
-                                     (unsigned long) len, (long) volume);
-#else
             Sint16 src1, src2;
             int dst_sample;
             const int max_audioval = ((1 << (16 - 1)) - 1);
@@ -198,7 +188,54 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
                 dst[0] = dst_sample & 0xFF;
                 dst += 2;
             }
-#endif
+        }
+        break;
+
+    case AUDIO_U16LSB:
+        {
+            Uint16 src1, src2;
+            int dst_sample;
+            const int max_audioval = 0xFFFF;
+
+            len /= 2;
+            while (len--) {
+                src1 = ((src[1]) << 8 | src[0]);
+                ADJUST_VOLUME(src1, volume);
+                src2 = ((dst[1]) << 8 | dst[0]);
+                src += 2;
+                dst_sample = src1 + src2;
+                if (dst_sample > max_audioval) {
+                    dst_sample = max_audioval;
+                }
+                dst[0] = dst_sample & 0xFF;
+                dst_sample >>= 8;
+                dst[1] = dst_sample & 0xFF;
+                dst += 2;
+            }
+        }
+        break;
+
+    case AUDIO_U16MSB:
+        {
+            Uint16 src1, src2;
+            int dst_sample;
+            const int max_audioval = 0xFFFF;
+
+            len /= 2;
+            while (len--) {
+                src1 = ((src[0]) << 8 | src[1]);
+                ADJUST_VOLUME(src1, volume);
+                src2 = ((dst[0]) << 8 | dst[1]);
+                src += 2;
+                dst_sample = src1 + src2;
+                if (dst_sample > max_audioval) {
+                    dst_sample = max_audioval;
+                }
+                dst[1] = dst_sample & 0xFF;
+                dst_sample >>= 8;
+                dst[0] = dst_sample & 0xFF;
+                dst += 2;
+            }
         }
         break;
 
@@ -313,7 +350,7 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
         break;
 
     default:                   /* If this happens... FIXME! */
-        SDL_SetError("SDL_MixAudio(): unknown audio format");
+        SDL_SetError("SDL_MixAudioFormat(): unknown audio format");
         return;
     }
 }

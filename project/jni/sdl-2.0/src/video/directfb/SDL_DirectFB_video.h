@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2021 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -19,10 +19,10 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include "SDL_config.h"
+#include "../../SDL_internal.h"
 
-#ifndef _SDL_DirectFB_video_h
-#define _SDL_DirectFB_video_h
+#ifndef SDL_DirectFB_video_h_
+#define SDL_DirectFB_video_h_
 
 #include <directfb.h>
 #include <directfb_version.h>
@@ -31,7 +31,6 @@
 #include "SDL_scancode.h"
 #include "SDL_render.h"
 
-#include "SDL_log.h"
 
 #define DFB_VERSIONNUM(X, Y, Z)                     \
     ((X)*1000 + (Y)*100 + (Z))
@@ -76,7 +75,7 @@
 #define DFBENV_USE_WM               "SDL_DIRECTFB_WM"       /* Default: off  */
 
 #define SDL_DFB_RELEASE(x) do { if ( (x) != NULL ) { SDL_DFB_CHECK(x->Release(x)); x = NULL; } } while (0)
-#define SDL_DFB_FREE(x) do { if ( (x) != NULL ) { SDL_free(x); x = NULL; } } while (0)
+#define SDL_DFB_FREE(x) do { SDL_free((x)); (x) = NULL; } while (0)
 #define SDL_DFB_UNLOCK(x) do { if ( (x) != NULL ) { x->Unlock(x); } } while (0)
 
 #define SDL_DFB_CONTEXT "SDL_DirectFB"
@@ -88,7 +87,7 @@
 
 #define SDL_DFB_DEBUG(x...) SDL_LogDebug(SDL_LOG_CATEGORY_VIDEO, x)
 
-static inline DFBResult sdl_dfb_check(DFBResult ret, const char *src_file, int src_line) {
+static SDL_INLINE DFBResult sdl_dfb_check(DFBResult ret, const char *src_file, int src_line) {
     if (ret != DFB_OK) {
         SDL_DFB_LOG("%s (%d):%s", src_file, src_line, DirectFBErrorString (ret) );
         SDL_SetError("%s:%s", SDL_DFB_CONTEXT, DirectFBErrorString (ret) );
@@ -154,10 +153,6 @@ struct _DFB_DeviceData
     int                 use_linux_input;
     int                 has_own_wm;
 
-
-    /* window grab */
-    SDL_Window          *grabbed_window;
-
     /* global events */
     IDirectFBEventBuffer *events;
 };
@@ -167,4 +162,4 @@ DFBSurfacePixelFormat DirectFB_SDLToDFBPixelFormat(Uint32 format);
 void DirectFB_SetSupportedPixelFormats(SDL_RendererInfo *ri);
 
 
-#endif /* _SDL_DirectFB_video_h */
+#endif /* SDL_DirectFB_video_h_ */

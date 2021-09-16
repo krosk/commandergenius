@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2021 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_config.h"
+#include "../../SDL_internal.h"
 
 #if SDL_VIDEO_DRIVER_DUMMY
 
@@ -78,15 +78,17 @@ DUMMY_CreateDevice(int devindex)
 {
     SDL_VideoDevice *device;
 
+    if (!DUMMY_Available()) {
+        return (0);
+    }
+
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
     if (!device) {
         SDL_OutOfMemory();
-        if (device) {
-            SDL_free(device);
-        }
         return (0);
     }
+    device->is_dummy = SDL_TRUE;
 
     /* Set the function pointers */
     device->VideoInit = DUMMY_VideoInit;
@@ -104,7 +106,7 @@ DUMMY_CreateDevice(int devindex)
 
 VideoBootStrap DUMMY_bootstrap = {
     DUMMYVID_DRIVER_NAME, "SDL dummy video driver",
-    DUMMY_Available, DUMMY_CreateDevice
+    DUMMY_CreateDevice
 };
 
 
@@ -114,6 +116,7 @@ DUMMY_VideoInit(_THIS)
     SDL_DisplayMode mode;
 
     /* Use a fake 32-bpp desktop mode */
+    SDL_zero(mode);
     mode.format = SDL_PIXELFORMAT_RGB888;
     mode.w = 1024;
     mode.h = 768;
@@ -123,7 +126,6 @@ DUMMY_VideoInit(_THIS)
         return -1;
     }
 
-    SDL_zero(mode);
     SDL_AddDisplayMode(&_this->displays[0], &mode);
 
     /* We're done! */

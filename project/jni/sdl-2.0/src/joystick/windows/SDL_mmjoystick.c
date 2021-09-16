@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2021 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -18,7 +18,7 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_config.h"
+#include "../../SDL_internal.h"
 
 #ifdef SDL_JOYSTICK_WINMM
 
@@ -33,19 +33,20 @@
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
 
+#ifdef REGSTR_VAL_JOYOEMNAME 
+#undef REGSTR_VAL_JOYOEMNAME 
+#endif
+#define REGSTR_VAL_JOYOEMNAME "OEMName"
+
 #define MAX_JOYSTICKS   16
 #define MAX_AXES    6       /* each joystick can have up to 6 axes */
 #define MAX_BUTTONS 32      /* and 32 buttons                      */
-#define AXIS_MIN    -32768  /* minimum value for axis coordinate */
-#define AXIS_MAX    32767   /* maximum value for axis coordinate */
-/* limit axis to 256 possible positions to filter out noise */
-#define JOY_AXIS_THRESHOLD      (((AXIS_MAX)-(AXIS_MIN))/256)
 #define JOY_BUTTON_FLAG(n)  (1<<n)
 
 
 /* array to hold joystick ID values */
 static UINT SYS_JoystickID[MAX_JOYSTICKS];
-static JOYCAPS SYS_Joystick[MAX_JOYSTICKS];
+static JOYCAPSA SYS_Joystick[MAX_JOYSTICKS];
 static char *SYS_JoystickName[MAX_JOYSTICKS];
 
 /* The private structure used to keep track of a joystick */
@@ -84,7 +85,12 @@ GetJoystickName(int index, const char *szRegKey)
     char regvalue[256];
     char regname[256];
 
-    SDL_snprintf(regkey, SDL_arraysize(regkey), "%s\\%s\\%s",
+    SDL_snprintf(regkey, SDL_arraysize(regkey),
+#ifdef UNICODE
+                 "%S\\%s\\%S",
+#else
+                 "%s\\%s\\%s",
+#endif
                  REGSTR_PATH_JOYCONFIG, szRegKey, REGSTR_KEY_JOYCURR);
     hTopKey = HKEY_LOCAL_MACHINE;
     regresult = RegOpenKeyExA(hTopKey, regkey, 0, KEY_READ, &hKey);
@@ -109,8 +115,13 @@ GetJoystickName(int index, const char *szRegKey)
     }
 
     /* open that registry key */
-    SDL_snprintf(regkey, SDL_arraysize(regkey), "%s\\%s", REGSTR_PATH_JOYOEM,
-                 regname);
+    SDL_snprintf(regkey, SDL_arraysize(regkey),
+#ifdef UNICODE
+                 "%S\\%s",
+#else
+                 "%s\\%s",
+#endif
+                 REGSTR_PATH_JOYOEM, regname);
     regresult = RegOpenKeyExA(hTopKey, regkey, 0, KEY_READ, &hKey);
     if (regresult != ERROR_SUCCESS) {
         return NULL;
@@ -135,20 +146,19 @@ GetJoystickName(int index, const char *szRegKey)
     return (name);
 }
 
-static int SDL_SYS_numjoysticks = 0;
+static int numjoysticks = 0;
 
 /* Function to scan the system for joysticks.
- * This function should set SDL_numjoysticks to the number of available
- * joysticks.  Joystick 0 should be the system default joystick.
+ * Joystick 0 should be the system default joystick.
  * It should return 0, or -1 on an unrecoverable fatal error.
  */
-int
-SDL_SYS_JoystickInit(void)
+static int
+WINMM_JoystickInit(void)
 {
     int i;
     int maxdevs;
     JOYINFOEX joyinfo;
-    JOYCAPS joycaps;
+    JOYCAPSA joycaps;
     MMRESULT result;
 
     /* Reset the joystick ID & name mapping tables */
@@ -158,44 +168,41 @@ SDL_SYS_JoystickInit(void)
     }
 
     /* Loop over all potential joystick devices */
-    SDL_SYS_numjoysticks = 0;
+    numjoysticks = 0;
     maxdevs = joyGetNumDevs();
-    for (i = JOYSTICKID1; i < maxdevs && SDL_SYS_numjoysticks < MAX_JOYSTICKS; ++i) {
+    for (i = JOYSTICKID1; i < maxdevs && numjoysticks < MAX_JOYSTICKS; ++i) {
 
         joyinfo.dwSize = sizeof(joyinfo);
         joyinfo.dwFlags = JOY_RETURNALL;
         result = joyGetPosEx(i, &joyinfo);
         if (result == JOYERR_NOERROR) {
-            result = joyGetDevCaps(i, &joycaps, sizeof(joycaps));
+            result = joyGetDevCapsA(i, &joycaps, sizeof(joycaps));
             if (result == JOYERR_NOERROR) {
-                SYS_JoystickID[SDL_SYS_numjoysticks] = i;
-                SYS_Joystick[SDL_SYS_numjoysticks] = joycaps;
-                SYS_JoystickName[SDL_SYS_numjoysticks] =
+                SYS_JoystickID[numjoysticks] = i;
+                SYS_Joystick[numjoysticks] = joycaps;
+                SYS_JoystickName[numjoysticks] =
                     GetJoystickName(i, joycaps.szRegKey);
-                SDL_SYS_numjoysticks++;
+                numjoysticks++;
             }
         }
     }
-    return (SDL_SYS_numjoysticks);
+    return numjoysticks;
 }
 
-int SDL_SYS_NumJoysticks()
+static int
+WINMM_NumJoysticks(void)
 {
-    return SDL_SYS_numjoysticks;
+    return numjoysticks;
 }
 
-void SDL_SYS_JoystickDetect()
+static void
+WINMM_JoystickDetect(void)
 {
-}
-
-SDL_bool SDL_SYS_JoystickNeedsPolling()
-{
-    return SDL_FALSE;
 }
 
 /* Function to get the device-dependent name of a joystick */
-const char *
-SDL_SYS_JoystickNameForDeviceIndex(int device_index)
+static const char *
+WINMM_JoystickGetDeviceName(int device_index)
 {
     if (SYS_JoystickName[device_index] != NULL) {
         return (SYS_JoystickName[device_index]);
@@ -204,25 +211,45 @@ SDL_SYS_JoystickNameForDeviceIndex(int device_index)
     }
 }
 
+static int
+WINMM_JoystickGetDevicePlayerIndex(int device_index)
+{
+    return -1;
+}
+
+static void
+WINMM_JoystickSetDevicePlayerIndex(int device_index, int player_index)
+{
+}
+
+static SDL_JoystickGUID WINMM_JoystickGetDeviceGUID(int device_index)
+{
+    SDL_JoystickGUID guid;
+    /* the GUID is just the first 16 chars of the name for now */
+    const char *name = WINMM_JoystickGetDeviceName(device_index);
+    SDL_zero(guid);
+    SDL_memcpy(&guid, name, SDL_min(sizeof(guid), SDL_strlen(name)));
+    return guid;
+}
+
 /* Function to perform the mapping from device index to the instance id for this index */
-SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int device_index)
+static SDL_JoystickID WINMM_JoystickGetDeviceInstanceID(int device_index)
 {
     return device_index;
 }
 
 /* Function to open a joystick for use.
-   The joystick to open is specified by the index field of the joystick.
+   The joystick to open is specified by the device index.
    This should fill the nbuttons and naxes fields of the joystick structure.
    It returns 0, or -1 if there is an error.
  */
-int
-SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
+static int
+WINMM_JoystickOpen(SDL_Joystick *joystick, int device_index)
 {
     int index, i;
     int caps_flags[MAX_AXES - 2] =
         { JOYCAPS_HASZ, JOYCAPS_HASR, JOYCAPS_HASU, JOYCAPS_HASV };
     int axis_min[MAX_AXES], axis_max[MAX_AXES];
-
 
     /* shortcut */
     index = device_index;
@@ -252,9 +279,9 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
     joystick->hwdata->id = SYS_JoystickID[index];
     for (i = 0; i < MAX_AXES; ++i) {
         if ((i < 2) || (SYS_Joystick[index].wCaps & caps_flags[i - 2])) {
-            joystick->hwdata->transaxis[i].offset = AXIS_MIN - axis_min[i];
+            joystick->hwdata->transaxis[i].offset = SDL_JOYSTICK_AXIS_MIN - axis_min[i];
             joystick->hwdata->transaxis[i].scale =
-                (float) (AXIS_MAX - AXIS_MIN) / (axis_max[i] - axis_min[i]);
+                (float) (SDL_JOYSTICK_AXIS_MAX - SDL_JOYSTICK_AXIS_MIN) / (axis_max[i] - axis_min[i]);
         } else {
             joystick->hwdata->transaxis[i].offset = 0;
             joystick->hwdata->transaxis[i].scale = 1.0; /* Just in case */
@@ -270,12 +297,6 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
         joystick->nhats = 0;
     }
     return (0);
-}
-
-/* Function to determine is this joystick is attached to the system right now */
-SDL_bool SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
-{
-    return SDL_TRUE;
 }
 
 static Uint8
@@ -301,22 +322,56 @@ TranslatePOV(DWORD value)
     return (pos);
 }
 
+static int
+WINMM_JoystickRumble(SDL_Joystick *joystick, Uint16 low_frequency_rumble, Uint16 high_frequency_rumble)
+{
+    return SDL_Unsupported();
+}
+
+static int
+WINMM_JoystickRumbleTriggers(SDL_Joystick *joystick, Uint16 left_rumble, Uint16 right_rumble)
+{
+    return SDL_Unsupported();
+}
+
+static SDL_bool WINMM_JoystickHasLED(SDL_Joystick *joystick)
+{
+    return SDL_FALSE;
+}
+
+static int
+WINMM_JoystickSetLED(SDL_Joystick *joystick, Uint8 red, Uint8 green, Uint8 blue)
+{
+    return SDL_Unsupported();
+}
+
+static int
+WINMM_JoystickSendEffect(SDL_Joystick *joystick, const void *data, int size)
+{
+    return SDL_Unsupported();
+}
+
+static int WINMM_JoystickSetSensorsEnabled(SDL_Joystick *joystick, SDL_bool enabled)
+{
+    return SDL_Unsupported();
+}
+
 /* Function to update the state of a joystick - called as a device poll.
  * This function shouldn't update the joystick structure directly,
  * but instead should call SDL_PrivateJoystick*() to deliver events
  * and update joystick device state.
  */
-void
-SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
+static void
+WINMM_JoystickUpdate(SDL_Joystick *joystick)
 {
     MMRESULT result;
     int i;
     DWORD flags[MAX_AXES] = { JOY_RETURNX, JOY_RETURNY, JOY_RETURNZ,
-        JOY_RETURNR, JOY_RETURNU, JOY_RETURNV
+                              JOY_RETURNR, JOY_RETURNU, JOY_RETURNV
     };
     DWORD pos[MAX_AXES];
     struct _transaxis *transaxis;
-    int value, change;
+    int value;
     JOYINFOEX joyinfo;
 
     joyinfo.dwSize = sizeof(joyinfo);
@@ -341,14 +396,8 @@ SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
     transaxis = joystick->hwdata->transaxis;
     for (i = 0; i < joystick->naxes; i++) {
         if (joyinfo.dwFlags & flags[i]) {
-            value =
-                (int) (((float) pos[i] +
-                        transaxis[i].offset) * transaxis[i].scale);
-            change = (value - joystick->axes[i]);
-            if ((change < -JOY_AXIS_THRESHOLD)
-                || (change > JOY_AXIS_THRESHOLD)) {
-                SDL_PrivateJoystickAxis(joystick, (Uint8) i, (Sint16) value);
-            }
+            value = (int) (((float) pos[i] + transaxis[i].offset) * transaxis[i].scale);
+            SDL_PrivateJoystickAxis(joystick, (Uint8) i, (Sint16) value);
         }
     }
 
@@ -356,72 +405,41 @@ SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
     if (joyinfo.dwFlags & JOY_RETURNBUTTONS) {
         for (i = 0; i < joystick->nbuttons; ++i) {
             if (joyinfo.dwButtons & JOY_BUTTON_FLAG(i)) {
-                if (!joystick->buttons[i]) {
-                    SDL_PrivateJoystickButton(joystick, (Uint8) i,
-                                              SDL_PRESSED);
-                }
+                SDL_PrivateJoystickButton(joystick, (Uint8) i, SDL_PRESSED);
             } else {
-                if (joystick->buttons[i]) {
-                    SDL_PrivateJoystickButton(joystick, (Uint8) i,
-                                              SDL_RELEASED);
-                }
+                SDL_PrivateJoystickButton(joystick, (Uint8) i, SDL_RELEASED);
             }
         }
     }
 
     /* joystick hat events */
     if (joyinfo.dwFlags & JOY_RETURNPOV) {
-        Uint8 pos;
-
-        pos = TranslatePOV(joyinfo.dwPOV);
-        if (pos != joystick->hats[0]) {
-            SDL_PrivateJoystickHat(joystick, 0, pos);
-        }
+        SDL_PrivateJoystickHat(joystick, 0, TranslatePOV(joyinfo.dwPOV));
     }
 }
 
 /* Function to close a joystick after use */
-void
-SDL_SYS_JoystickClose(SDL_Joystick * joystick)
+static void
+WINMM_JoystickClose(SDL_Joystick *joystick)
 {
-    if (joystick->hwdata != NULL) {
-        /* free system specific hardware data */
-        SDL_free(joystick->hwdata);
-        joystick->hwdata = NULL;
-    }
+    SDL_free(joystick->hwdata);
 }
 
 /* Function to perform any system-specific joystick related cleanup */
-void
-SDL_SYS_JoystickQuit(void)
+static void
+WINMM_JoystickQuit(void)
 {
     int i;
     for (i = 0; i < MAX_JOYSTICKS; i++) {
-        if (SYS_JoystickName[i] != NULL) {
-            SDL_free(SYS_JoystickName[i]);
-            SYS_JoystickName[i] = NULL;
-        }
+        SDL_free(SYS_JoystickName[i]);
+        SYS_JoystickName[i] = NULL;
     }
 }
 
-SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
+static SDL_bool
+WINMM_JoystickGetGamepadMapping(int device_index, SDL_GamepadMapping *out)
 {
-    SDL_JoystickGUID guid;
-    /* the GUID is just the first 16 chars of the name for now */
-    const char *name = SDL_SYS_JoystickNameForDeviceIndex( device_index );
-    SDL_zero( guid );
-    SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
-    return guid;
-}
-
-SDL_JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick)
-{
-    SDL_JoystickGUID guid;
-    /* the GUID is just the first 16 chars of the name for now */
-    const char *name = joystick->name;
-    SDL_zero( guid );
-    SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
-    return guid;
+    return SDL_FALSE;
 }
 
 
@@ -468,6 +486,29 @@ SetMMerror(char *function, int code)
     }
     SDL_SetError("%s", errbuf);
 }
+
+SDL_JoystickDriver SDL_WINMM_JoystickDriver =
+{
+    WINMM_JoystickInit,
+    WINMM_NumJoysticks,
+    WINMM_JoystickDetect,
+    WINMM_JoystickGetDeviceName,
+    WINMM_JoystickGetDevicePlayerIndex,
+    WINMM_JoystickSetDevicePlayerIndex,
+    WINMM_JoystickGetDeviceGUID,
+    WINMM_JoystickGetDeviceInstanceID,
+    WINMM_JoystickOpen,
+    WINMM_JoystickRumble,
+    WINMM_JoystickRumbleTriggers,
+    WINMM_JoystickHasLED,
+    WINMM_JoystickSetLED,
+    WINMM_JoystickSendEffect,
+    WINMM_JoystickSetSensorsEnabled,
+    WINMM_JoystickUpdate,
+    WINMM_JoystickClose,
+    WINMM_JoystickQuit,
+    WINMM_JoystickGetGamepadMapping
+};
 
 #endif /* SDL_JOYSTICK_WINMM */
 
