@@ -4,35 +4,34 @@ SDL_MIXER_LOCAL_PATH := $(call my-dir)
 
 # Enable this if you want to support loading FLAC music with libFLAC
 SUPPORT_FLAC ?= true
-FLAC_LIBRARY_PATH := external/flac-1.3.2
+FLAC_LIBRARY_PATH := 
 
 # Enable this if you want to support loading OGG Vorbis music via Tremor
 SUPPORT_OGG ?= true
-OGG_LIBRARY_PATH := external/libogg-1.3.2
-VORBIS_LIBRARY_PATH := external/libvorbisidec-1.2.1
+OGG_LIBRARY_PATH := 
+VORBIS_LIBRARY_PATH := 
 
 # Enable this if you want to support loading MP3 music via MPG123
-SUPPORT_MP3_MPG123 ?= true
+SUPPORT_MP3_MPG123 ?= false
 MPG123_LIBRARY_PATH := external/mpg123-1.25.6
 
 # Enable this if you want to support loading MOD music via modplug
-SUPPORT_MOD_MODPLUG ?= true
+SUPPORT_MOD_MODPLUG ?= false
 MODPLUG_LIBRARY_PATH := external/libmodplug-0.8.9.0
 
 # Enable this if you want to support TiMidity
-SUPPORT_MID_TIMIDITY ?= true
+SUPPORT_MID_TIMIDITY ?= false
 TIMIDITY_LIBRARY_PATH := timidity
 
 
 # Build the library
 ifeq ($(SUPPORT_FLAC),true)
-    include $(SDL_MIXER_LOCAL_PATH)/$(FLAC_LIBRARY_PATH)/Android.mk
+    
 endif
 
 # Build the library
 ifeq ($(SUPPORT_OGG),true)
-    include $(SDL_MIXER_LOCAL_PATH)/$(OGG_LIBRARY_PATH)/Android.mk
-    include $(SDL_MIXER_LOCAL_PATH)/$(VORBIS_LIBRARY_PATH)/Android.mk
+    
 endif
 
 # Build the library
@@ -66,16 +65,13 @@ LOCAL_STATIC_LIBRARIES :=
 LOCAL_SHARED_LIBRARIES := SDL2
 
 ifeq ($(SUPPORT_FLAC),true)
-    LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(FLAC_LIBRARY_PATH)/include
     LOCAL_CFLAGS += -DMUSIC_FLAC
-    LOCAL_STATIC_LIBRARIES += libFLAC
+    LOCAL_SHARED_LIBRARIES += flac
 endif
 
 ifeq ($(SUPPORT_OGG),true)
-    LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(OGG_LIBRARY_PATH)/include
-    LOCAL_C_INCLUDES += $(LOCAL_PATH)/$(VORBIS_LIBRARY_PATH)
     LOCAL_CFLAGS += -DMUSIC_OGG -DOGG_USE_TREMOR -DOGG_HEADER="<ivorbisfile.h>"
-    LOCAL_STATIC_LIBRARIES += ogg vorbisidec
+    LOCAL_SHARED_LIBRARIES += ogg vorbis
 endif
 
 # This needs to be a shared library to comply with the LGPL license
