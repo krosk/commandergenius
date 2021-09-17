@@ -82,12 +82,10 @@ LOCAL_MODULE:= libcurl
 
 LOCAL_MODULE_FILENAME := libcurl-sdl # It clashes with system libcurl in Android 4.3 and older
 
-#LOCAL_SHARED_LIBRARIES := ssl crypto
-LOCAL_STATIC_LIBRARIES := ssl crypto
+LOCAL_SHARED_LIBRARIES := ssl crypto
 
 LOCAL_LDLIBS := -lz
 
-#include $(BUILD_SHARED_LIBRARY)
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
 endif

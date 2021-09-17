@@ -66,11 +66,11 @@ SDL_APP_LIB_DEPENDS-$(TARGET_ARCH_ABI) := $(LOCAL_PATH)/src/AndroidBuild.sh $(LO
 SDL_APP_LIB_DEPENDS-$(TARGET_ARCH_ABI) += $(foreach LIB, $(LOCAL_SHARED_LIBRARIES), obj/local/$(TARGET_ARCH_ABI)/lib$(LIB).so)
 SDL_APP_LIB_DEPENDS-$(TARGET_ARCH_ABI) += $(foreach LIB, $(LOCAL_STATIC_LIBRARIES), obj/local/$(TARGET_ARCH_ABI)/lib$(LIB).a)
 
-.PHONY: obj/local/$(TARGET_ARCH_ABI)/libcrypto.so obj/local/$(TARGET_ARCH_ABI)/libssl.so obj/local/$(TARGET_ARCH_ABI)/libcurl.so
-obj/local/$(TARGET_ARCH_ABI)/libcrypto.so: obj/local/$(TARGET_ARCH_ABI)/libcrypto.so.sdl.0.so
-obj/local/$(TARGET_ARCH_ABI)/libssl.so: obj/local/$(TARGET_ARCH_ABI)/libssl.so.sdl.0.so
-obj/local/$(TARGET_ARCH_ABI)/libcurl.so: obj/local/$(TARGET_ARCH_ABI)/libcurl-sdl.so
-obj/local/$(TARGET_ARCH_ABI)/libexpat.so: obj/local/$(TARGET_ARCH_ABI)/libexpat-sdl.so
+#.PHONY: obj/local/$(TARGET_ARCH_ABI)/libcrypto.so obj/local/$(TARGET_ARCH_ABI)/libssl.so obj/local/$(TARGET_ARCH_ABI)/libcurl.so
+#obj/local/$(TARGET_ARCH_ABI)/libcrypto.so: obj/local/$(TARGET_ARCH_ABI)/libcrypto.so.sdl.0.so
+#obj/local/$(TARGET_ARCH_ABI)/libssl.so: obj/local/$(TARGET_ARCH_ABI)/libssl.so.sdl.0.so
+#obj/local/$(TARGET_ARCH_ABI)/libcurl.so: obj/local/$(TARGET_ARCH_ABI)/libcurl-sdl.so
+#obj/local/$(TARGET_ARCH_ABI)/libexpat.so: obj/local/$(TARGET_ARCH_ABI)/libexpat-sdl.so
 
 include $(BUILD_SHARED_LIBRARY)
 
