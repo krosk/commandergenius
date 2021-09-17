@@ -18,7 +18,12 @@ LOCAL_CPP_EXTENSION := .cpp
 
 LOCAL_SRC_FILES := $(notdir $(wildcard $(LOCAL_PATH)/*.c))
 
+ifeq ($(SDL_VERSION),2.0)
+LOCAL_SHARED_LIBRARIES := SDL2
+else
 LOCAL_SHARED_LIBRARIES := sdl-$(SDL_VERSION)
+endif
+
 LOCAL_STATIC_LIBRARIES := flac mikmod
 
 LOCAL_LDLIBS := -llog

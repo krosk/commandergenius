@@ -20,7 +20,11 @@ LOCAL_SRC_FILES := $(notdir $(wildcard $(LOCAL_PATH)/*.c))
 
 LOCAL_STATIC_LIBRARIES := png jpeg
 
+ifeq ($(SDL_VERSION),2.0)
+LOCAL_SHARED_LIBRARIES := SDL2
+else
 LOCAL_SHARED_LIBRARIES := sdl-$(SDL_VERSION)
+endif
 
 LOCAL_LDLIBS := -lz
 

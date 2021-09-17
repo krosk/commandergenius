@@ -16,7 +16,12 @@ LOCAL_SRC_FILES := $(notdir $(wildcard $(LOCAL_PATH)/*.c)) \
 					$(addprefix decoders/, $(notdir $(wildcard $(LOCAL_PATH)/decoders/*.c))) \
 					$(addprefix decoders/mpglib/, $(notdir $(wildcard $(LOCAL_PATH)/decoders/mpglib/*.c)))
 
+ifeq ($(SDL_VERSION),2.0)
+LOCAL_SHARED_LIBRARIES := SDL2
+else
 LOCAL_SHARED_LIBRARIES := sdl-$(SDL_VERSION)
+endif
+
 LOCAL_STATIC_LIBRARIES := flac mikmod vorbis ogg
 
 LOCAL_LDLIBS :=

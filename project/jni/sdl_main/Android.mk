@@ -15,7 +15,16 @@ LOCAL_CPP_EXTENSION := .cpp
 
 LOCAL_SRC_FILES := sdl_main.c SDL_android_main.cpp
 
+ifeq ($(SDL_VERSION),2.0)
+LOCAL_SHARED_LIBRARIES := SDL2 application
+else
 LOCAL_SHARED_LIBRARIES := sdl-$(SDL_VERSION) application
+endif
+
 LOCAL_LDLIBS := -llog
 
+ifeq ($(CUSTOM_BUILD_SCRIPT_FIRST_PASS),)
+
 include $(BUILD_SHARED_LIBRARY)
+
+endif

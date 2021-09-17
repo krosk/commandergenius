@@ -1,5 +1,7 @@
 LOCAL_PATH := $(call my-dir)
 
+ifneq (sdl-2.0,$(notdir $(LOCAL_PATH)))
+
 ###########################
 #
 # SDL shared library
@@ -9,6 +11,8 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := SDL2
+
+LOCAL_MODULE_FILENAME := libSDL2
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 
@@ -86,21 +90,6 @@ include $(BUILD_SHARED_LIBRARY)
 
 ###########################
 #
-# SDL static library
-#
-###########################
-
-LOCAL_MODULE := SDL2_static
-
-LOCAL_MODULE_FILENAME := libSDL2
-
-LOCAL_LDLIBS := 
-LOCAL_EXPORT_LDLIBS := -ldl -lGLESv1_CM -lGLESv2 -llog -landroid
-
-include $(BUILD_STATIC_LIBRARY)
-
-###########################
-#
 # SDL main static library
 #
 ###########################
@@ -134,3 +123,4 @@ include $(BUILD_SHARED_LIBRARY)
 
 $(call import-module,android/cpufeatures)
 
+endif
