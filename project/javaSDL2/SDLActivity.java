@@ -144,7 +144,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             // "SDL2_net",
             // "SDL2_ttf",
             //"main",
-	    "application"
+            "application"
         };
     }
 

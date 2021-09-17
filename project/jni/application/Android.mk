@@ -56,8 +56,4 @@ LOCAL_CPPFLAGS += $(APPLICATION_ADDITIONAL_CPPFLAGS)
 # Change C++ file extension as appropriate
 LOCAL_CPP_EXTENSION := .cpp .cxx .cc
 
-ifneq ($(APPLICATION_CUSTOM_BUILD_SCRIPT),)
-LOCAL_SRC_FILES := dummy.c
-endif
-
 include $(BUILD_SHARED_LIBRARY)
