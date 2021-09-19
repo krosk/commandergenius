@@ -32,6 +32,9 @@ case "$PKG" in
   sdl)
     PKG=sdl-1.2
     ;;
+  sdl2)
+    PKG=SDL2
+    ;;
   zlib)
     PKG=sdl-1.2
     ;;
