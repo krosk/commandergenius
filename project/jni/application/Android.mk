@@ -20,6 +20,8 @@ LOCAL_LDFLAGS := -Lobj/local/$(TARGET_ARCH_ABI)
 
 LOCAL_LDFLAGS += $(APPLICATION_ADDITIONAL_LDFLAGS)
 
+ifeq ($(APPLICATION_CUSTOM_BUILD_SCRIPT),)
+
 APP_SUBDIRS := $(patsubst $(LOCAL_PATH)/%, %, $(shell find $(LOCAL_PATH)/$(APPDIR) -path '*/.svn' -prune -o -type d -print))
 ifneq ($(APPLICATION_SUBDIRS_BUILD),)
 APPLICATION_SUBDIRS_BUILD_NONRECURSIVE := $(addprefix $(APPDIR)/, $(filter-out %/*, $(APPLICATION_SUBDIRS_BUILD)))
@@ -56,8 +58,13 @@ LOCAL_CPPFLAGS += $(APPLICATION_ADDITIONAL_CPPFLAGS)
 # Change C++ file extension as appropriate
 LOCAL_CPP_EXTENSION := .cpp .cxx .cc
 
-ifneq ($(APPLICATION_CUSTOM_BUILD_SCRIPT),)
-LOCAL_SRC_FILES := dummy.c
-endif
-
 include $(BUILD_SHARED_LIBRARY)
+
+else ifeq ($(CUSTOM_BUILD_SCRIPT_FIRST_PASS),) # APPLICATION_CUSTOM_BUILD_SCRIPT and not CUSTOM_BUILD_SCRIPT_FIRST_PASS
+
+LOCAL_SRC_FILES := $(APPDIR)/libapplication-$(TARGET_ARCH_ABI).so
+LOCAL_MODULE_FILENAME := libapplication
+
+include $(PREBUILT_SHARED_LIBRARY)
+
+endif
