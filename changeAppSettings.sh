@@ -865,7 +865,7 @@ if ls ../jni/application/src/*.java > /dev/null 2>&1; then cp -f ../jni/applicat
 if [ "$LibSdlVersion" = "2.0" ] ; then
 	for F in ../src/*.java; do
 		echo Patching $F
-		$SEDI "s/^package .*;/package $AppFullName;/" $F
+		$SEDI "s/^package .*;/package org.libsdl.app;/" $F
 	done
 else
    for F in ../src/*.java; do
@@ -880,7 +880,7 @@ cd ../..
 echo Patching project/AndroidManifest.xml
 if [ "$LibSdlVersion" = "2.0" ] ; then
 	cat project/AndroidManifestTemplateSDL2.xml | \
-		sed "s/package=.*/package=\"$AppFullName\"/" | \
+		sed "s/package=.*/package=\"org.libsdl.app\"/" | \
 		sed "s^android:versionCode=.*^android:versionCode=\"$AppVersionCode\"^" | \
 		sed "s^android:versionName=.*^android:versionName=\"$AppVersionName\"^" > \
 		project/AndroidManifest.xml
