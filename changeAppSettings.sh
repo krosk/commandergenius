@@ -864,8 +864,17 @@ if ls ../jni/application/src/*.java > /dev/null 2>&1; then cp -f ../jni/applicat
 
 if [ "$LibSdlVersion" = "2.0" ] ; then
 	for F in ../src/*.java; do
-		echo Patching $F
-		$SEDI "s/^package .*;/package org.libsdl.app;/" $F
+		case "$F" in
+			*SDL*)
+				echo Skipping patching $F
+				;;
+			*HIDDevice*)
+				echo Skipping patching $F
+				;;
+			*)
+				echo Patching $F
+				$SEDI "s/^package .*;/package $AppFullName;/" $F
+		esac
 	done
 else
    for F in ../src/*.java; do
@@ -880,7 +889,7 @@ cd ../..
 echo Patching project/AndroidManifest.xml
 if [ "$LibSdlVersion" = "2.0" ] ; then
 	cat project/AndroidManifestTemplateSDL2.xml | \
-		sed "s/package=.*/package=\"org.libsdl.app\"/" | \
+		sed "s/package=.*/package=\"$AppFullName\"/" | \
 		sed "s^android:versionCode=.*^android:versionCode=\"$AppVersionCode\"^" | \
 		sed "s^android:versionName=.*^android:versionName=\"$AppVersionName\"^" > \
 		project/AndroidManifest.xml
@@ -1004,6 +1013,24 @@ if [ "$NeedGles3" = "y" ] ; then
 else
 	NeedGles3=false
 	$SEDI "/==GLES3==/ d" project/AndroidManifest.xml
+fi
+
+if [ "$LibSdlVersion" = "2.0" ] ; then
+ACTIVITY="${AppShortName}Activity"
+sed -i -e "s|\"SDLActivity\"|\"$ACTIVITY\"|g" project/AndroidManifest.xml
+
+echo Creating $JAVA_SRC_PATH/$ACTIVITY.java ...
+
+# Fill in a default Activity
+cat >"$JAVA_SRC_PATH/$ACTIVITY.java" <<__EOF__
+package $AppFullName;
+
+import org.libsdl.app.SDLActivity;
+
+public class $ACTIVITY extends SDLActivity
+{
+}
+__EOF__
 fi
 
 echo Patching project/src/Globals.java
