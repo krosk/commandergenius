@@ -1016,21 +1016,8 @@ else
 fi
 
 if [ "$LibSdlVersion" = "2.0" ] ; then
-ACTIVITY="${AppShortName}Activity"
-sed -i -e "s|\"SDLActivity\"|\"$ACTIVITY\"|g" project/AndroidManifest.xml
-
-echo Creating $JAVA_SRC_PATH/$ACTIVITY.java ...
-
-# Fill in a default Activity
-cat >"$JAVA_SRC_PATH/$ACTIVITY.java" <<__EOF__
-package $AppFullName;
-
-import org.libsdl.app.SDLActivity;
-
-public class $ACTIVITY extends SDLActivity
-{
-}
-__EOF__
+ACTIVITY="MainActivity"
+sed -i -e "s|\"SDLActivity\"|\"MainActivity\"|g" project/AndroidManifest.xml
 fi
 
 echo Patching project/src/Globals.java
