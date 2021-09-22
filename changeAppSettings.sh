@@ -863,7 +863,10 @@ if [ -e ../jni/application/src/java.patch ]; then patch -d ../src --no-backup-if
 if ls ../jni/application/src/*.java > /dev/null 2>&1; then cp -f ../jni/application/src/*.java ../src ; fi
 
 if [ "$LibSdlVersion" = "2.0" ] ; then
-	echo Patching java with SDL 2.0 not supported
+	for F in ../src/*.java; do
+		echo Patching $F
+		$SEDI "s/^package .*;/package $AppFullName;/" $F
+	done
 else
    for F in ../src/*.java; do
 	echo Patching $F
@@ -1003,26 +1006,6 @@ else
 	$SEDI "/==GLES3==/ d" project/AndroidManifest.xml
 fi
 
-
-if [ "$LibSdlVersion" = "2.0" ] ; then
-echo Patching java files not fully supported in SDL 2.0 yet.
-ACTIVITY="${AppShortName}Activity"
-sed -i -e "s|\"SDLActivity\"|\"$ACTIVITY\"|g" project/AndroidManifest.xml
-
-echo Creating $JAVA_SRC_PATH/$ACTIVITY.java ...
-
-# Fill in a default Activity
-cat >"$JAVA_SRC_PATH/$ACTIVITY.java" <<__EOF__
-package $AppFullName;
-
-import org.libsdl.app.SDLActivity;
-
-public class $ACTIVITY extends SDLActivity
-{
-}
-__EOF__
-
-else
 echo Patching project/src/Globals.java
 $SEDI "s/public static String ApplicationName = .*;/public static String ApplicationName = \"$AppShortName\";/" project/src/Globals.java
 $SEDI "s/public static final boolean Using_SDL_1_3 = .*;/public static final boolean Using_SDL_1_3 = $UsingSdl13;/" project/src/Globals.java
@@ -1089,7 +1072,6 @@ $SEDI "s/public static String AdmobBannerSize = .*/public static String AdmobBan
 $SEDI "s%public static String GooglePlayGameServicesId = .*%public static String GooglePlayGameServicesId = \"$GooglePlayGameServicesId\";%" project/src/Globals.java
 $SEDI "s/public static String AppLibraries.*/public static String AppLibraries[] = { $LibrariesToLoad };/" project/src/Globals.java
 $SEDI "s/public static String AppMainLibraries.*/public static String AppMainLibraries[] = { $MainLibrariesToLoad };/" project/src/Globals.java
-fi
 
 
 # TODO: We should not build png, jpeg if SDL2_image is used
