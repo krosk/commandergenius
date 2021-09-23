@@ -61,6 +61,12 @@ int threadedMain(void * unused)
 }
 #endif
 
+extern void SDL_Android_Init(JNIEnv* env, jclass cls);
+void SDL_Android_Init(JNIEnv* env, jclass cls)
+{
+	
+}
+
 extern C_LINKAGE void
 JAVA_EXPORT_NAME(DemoRenderer_nativeInit) ( JNIEnv*  env, jobject thiz, jstring jcurdir, jstring cmdline, jint multiThreadedVideo, jint unused )
 {

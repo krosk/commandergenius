@@ -111,4 +111,18 @@ public class MainActivity extends SDLActivity
 		//return new String[0];
 		return commandline.split(" ");
 	}
+
+	@Override
+	protected String[] getLibraries() {
+		return new String[] {
+			"hidapi",
+			"SDL2",
+			// "SDL2_image",
+			// "SDL2_mixer",
+			// "SDL2_net",
+			// "SDL2_ttf",
+			"application",
+			"sdl_main"
+		};
+	}
 }
