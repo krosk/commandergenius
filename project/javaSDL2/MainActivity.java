@@ -125,4 +125,9 @@ public class MainActivity extends SDLActivity
 			"sdl_main"
 		};
 	}
+
+	@Override
+	protected String getMainFunction() {
+		return "SDL_main_stub";
+	}
 }
