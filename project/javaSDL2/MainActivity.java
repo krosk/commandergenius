@@ -135,7 +135,6 @@ public class MainActivity extends SDLActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		//copyAssets();
 
 		class Callback implements Runnable
 		{
@@ -166,10 +165,16 @@ public class MainActivity extends SDLActivity
 			}
 		};
 
+		// must wait until above callback is completed
 		Thread t = (new Thread(new Callback(this)));
 		t.start();
 		try {
 			t.join();
+		} catch( InterruptedException e ) {};
+
+		// at this point, DataDownloader must be defined
+		try {
+			this.downloader.join();
 		} catch( InterruptedException e ) {};
 	}
 
@@ -213,7 +218,12 @@ public class MainActivity extends SDLActivity
 		}
 		Callback cb = new Callback();
 		cb.Parent = this;
-		this.runOnUiThread(cb);
+		// must wait until the thread above is completed (DataDownloader needs to be defined)
+		Thread t = (new Thread(cb));
+		t.start();
+		try {
+			t.join();
+		} catch( InterruptedException e ) {};
 	}
 
 	private static DataDownloader downloader = null;
@@ -221,49 +231,4 @@ public class MainActivity extends SDLActivity
 	private TextView _tv = null;
 
 	public boolean writeExternalStoragePermissionDialogAnswered = true;
-
-	private void copyAssets() {
-		AssetManager assetManager = getAssets();
-		String[] files = null;
-		try {
-			files = assetManager.list("");
-		} catch (IOException e) {
-			Log.e("tag", "Failed to get asset file list.", e);
-		}
-		if (files != null) for (String filename : files) {
-			InputStream in = null;
-			OutputStream out = null;
-			try {
-			in = assetManager.open(filename);
-			File outFile = new File(getExternalFilesDir(null), filename);
-			out = new FileOutputStream(outFile);
-			copyFile(in, out);
-			} catch(IOException e) {
-				Log.e("tag", "Failed to copy asset file: " + filename, e);
-			}     
-			finally {
-				if (in != null) {
-					try {
-						in.close();
-					} catch (IOException e) {
-						// NOOP
-					}
-				}
-				if (out != null) {
-					try {
-						out.close();
-					} catch (IOException e) {
-						// NOOP
-					}
-				}
-			}  
-		}
-	}
-	private void copyFile(InputStream in, OutputStream out) throws IOException {
-		byte[] buffer = new byte[1024];
-		int read;
-		while((read = in.read(buffer)) != -1){
-		out.write(buffer, 0, read);
-		}
-	}
 }
