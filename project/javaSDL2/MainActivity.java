@@ -123,13 +123,14 @@ public class MainActivity extends SDLActivity
 			// "SDL2_net",
 			// "SDL2_ttf",
 			"application",
+			"sdl_native_helpers",
 			"sdl_main"
 		};
 	}
 
 	@Override
 	protected String getMainFunction() {
-		return "SDL_main_stub";
+		return "SDL_main";
 	}
 
 	@Override
@@ -176,6 +177,11 @@ public class MainActivity extends SDLActivity
 		try {
 			this.downloader.join();
 		} catch( InterruptedException e ) {};
+
+		Log.i("SDL", "onCreate() end");
+
+		Log.i("SDL", "libSDL: Attempting Globals.DataDir " + Globals.DataDir);
+		Settings.nativeChdir(Globals.DataDir);
 	}
 
 	public void setUpStatusLabel()
@@ -204,7 +210,7 @@ public class MainActivity extends SDLActivity
 
 	public void startDownloader()
 	{
-		Log.i("SDL", "libSDL: Starting data downloader");
+		Log.i("SDL", "startDownloader()");
 		class Callback implements Runnable
 		{
 			public MainActivity Parent;
@@ -224,6 +230,8 @@ public class MainActivity extends SDLActivity
 		try {
 			t.join();
 		} catch( InterruptedException e ) {};
+
+		Log.i("SDL", "startDownloader() end");
 	}
 
 	private static DataDownloader downloader = null;

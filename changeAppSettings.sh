@@ -1090,7 +1090,7 @@ $SEDI "s/public static String AppMainLibraries.*/public static String AppMainLib
 
 # TODO: We should not build png, jpeg if SDL2_image is used
 if [ "$LibSdlVersion" = "2.0" ]; then
-	APP_MODULES_BASE="SDL2"
+	APP_MODULES_BASE="SDL2 sdl_native_helpers"
 else
 	APP_MODULES_BASE="sdl-$LibSdlVersion sdl_main sdl_native_helpers jpeg png ogg flac vorbis freetype"
 fi

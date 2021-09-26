@@ -244,6 +244,9 @@ class DataDownloader extends Thread
 		}
 		DownloadComplete = true;
 		//Parent.getVideoLayout().setOnKeyListener(null);
+
+		Log.i("SDL", "Finish DataDownloader");
+
 		initParent();
 	}
 

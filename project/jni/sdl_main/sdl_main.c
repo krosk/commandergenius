@@ -67,26 +67,6 @@ void SDL_Android_Init(JNIEnv* env, jclass cls)
 
 }
 
-extern C_LINKAGE int
-SDL_main_stub(int argc, char *argv[])
-{
-	__android_log_print(ANDROID_LOG_INFO, "libSDL", "SDL_main_stub()");
-	// /storage/sdcard0/Android/data/your.app.package/files
-	char curdir[PATH_MAX] = "";
-	const char * externalPath = SDL_AndroidGetExternalStoragePath();
-	if (externalPath == NULL) {
-		__android_log_print(ANDROID_LOG_INFO, "libSDL", "SDL_AndroidGetExternalStoragePath() is null");
-	} else {
-		__android_log_print(ANDROID_LOG_INFO, "libSDL", "SDL_AndroidGetExternalStoragePath() is \"%s\"", externalPath);
-		chdir(externalPath);
-	}
-
-	__android_log_print(ANDROID_LOG_INFO, "libSDL", "Calling SDL_main()");
-	int ret = SDL_main(argc, argv);
-	__android_log_print(ANDROID_LOG_INFO, "libSDL", "Exited SDL_main() with %d", ret);
-	return ret;
-}
-
 extern C_LINKAGE void
 JAVA_EXPORT_NAME(DemoRenderer_nativeInit) ( JNIEnv*  env, jobject thiz, jstring jcurdir, jstring cmdline, jint multiThreadedVideo, jint unused )
 {
