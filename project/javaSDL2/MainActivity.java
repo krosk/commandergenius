@@ -75,6 +75,7 @@ import java.io.InputStreamReader;
 import android.view.inputmethod.InputMethodManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -129,5 +130,140 @@ public class MainActivity extends SDLActivity
 	@Override
 	protected String getMainFunction() {
 		return "SDL_main_stub";
+	}
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		//copyAssets();
+
+		class Callback implements Runnable
+		{
+			MainActivity p;
+			Callback( MainActivity _p ) { p = _p; }
+			public void run()
+			{
+				try {
+					Thread.sleep(200);
+				} catch( InterruptedException e ) {};
+
+				Settings.Load(p);
+
+				//if( !Settings.settingsChanged )
+				{
+					if( Globals.StartupMenuButtonTimeout > 0 )
+					{
+						Log.i("SDL", "libSDL: " + String.valueOf(Globals.StartupMenuButtonTimeout) + "-msec timeout in startup screen");
+						try {
+							Thread.sleep(Globals.StartupMenuButtonTimeout);
+						} catch( InterruptedException e ) {};
+					}
+					//if( Settings.settingsChanged )
+					//	return;
+					Log.i("SDL", "libSDL: Timeout reached in startup screen, process with downloader");
+					p.startDownloader();
+				}
+			}
+		};
+
+		Thread t = (new Thread(new Callback(this)));
+		t.start();
+		try {
+			t.join();
+		} catch( InterruptedException e ) {};
+	}
+
+	public void setUpStatusLabel()
+	{
+		MainActivity Parent = this; // Too lazy to rename
+		//if( Parent._btn != null )
+		//{
+		//	Parent._layout2.removeView(Parent._btn);
+		//	Parent._btn = null;
+		//}
+		if( Parent._tv == null )
+		{
+			//Get the display so we can know the screen size
+			Display display = getWindowManager().getDefaultDisplay();
+			int width = display.getWidth();
+			int height = display.getHeight();
+			Parent._tv = new TextView(Parent);
+			Parent._tv.setMaxLines(2); // To show some long texts on smaller devices
+			Parent._tv.setMinLines(2); // Otherwise the background picture is getting resized at random, which does not look good
+			Parent._tv.setText(R.string.init);
+			// Padding is a good idea because if the display device is a TV the edges might be cut off
+			Parent._tv.setPadding((int)(width * 0.1), (int)(height * 0.1), (int)(width * 0.1), 0);
+			//Parent._layout2.addView(Parent._tv);
+		}
+	}
+
+	public void startDownloader()
+	{
+		Log.i("SDL", "libSDL: Starting data downloader");
+		class Callback implements Runnable
+		{
+			public MainActivity Parent;
+			public void run()
+			{
+				setUpStatusLabel();
+				Log.i("SDL", "libSDL: Starting downloader");
+				if( Parent.downloader == null )
+					Parent.downloader = new DataDownloader(Parent, Parent._tv);
+			}
+		}
+		Callback cb = new Callback();
+		cb.Parent = this;
+		this.runOnUiThread(cb);
+	}
+
+	private static DataDownloader downloader = null;
+
+	private TextView _tv = null;
+
+	public boolean writeExternalStoragePermissionDialogAnswered = true;
+
+	private void copyAssets() {
+		AssetManager assetManager = getAssets();
+		String[] files = null;
+		try {
+			files = assetManager.list("");
+		} catch (IOException e) {
+			Log.e("tag", "Failed to get asset file list.", e);
+		}
+		if (files != null) for (String filename : files) {
+			InputStream in = null;
+			OutputStream out = null;
+			try {
+			in = assetManager.open(filename);
+			File outFile = new File(getExternalFilesDir(null), filename);
+			out = new FileOutputStream(outFile);
+			copyFile(in, out);
+			} catch(IOException e) {
+				Log.e("tag", "Failed to copy asset file: " + filename, e);
+			}     
+			finally {
+				if (in != null) {
+					try {
+						in.close();
+					} catch (IOException e) {
+						// NOOP
+					}
+				}
+				if (out != null) {
+					try {
+						out.close();
+					} catch (IOException e) {
+						// NOOP
+					}
+				}
+			}  
+		}
+	}
+	private void copyFile(InputStream in, OutputStream out) throws IOException {
+		byte[] buffer = new byte[1024];
+		int read;
+		while((read = in.read(buffer)) != -1){
+		out.write(buffer, 0, read);
+		}
 	}
 }
