@@ -148,6 +148,7 @@ public class MainActivity extends SDLActivity
 				} catch( InterruptedException e ) {};
 
 				Settings.Load(p);
+				setScreenOrientation();
 
 				//if( !Settings.settingsChanged )
 				{
@@ -232,6 +233,24 @@ public class MainActivity extends SDLActivity
 		} catch( InterruptedException e ) {};
 
 		Log.i("SDL", "startDownloader() end");
+	}
+
+	void setScreenOrientation()
+	{
+		//if( !Globals.AutoDetectOrientation && getIntent().getBooleanExtra(RestartMainActivity.ACTIVITY_AUTODETECT_SCREEN_ORIENTATION, false) )
+		//	Globals.AutoDetectOrientation = true;
+		if( Globals.AutoDetectOrientation )
+		{
+			if( android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2 )
+				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
+			else
+				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+			return;
+		}
+		if( android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.GINGERBREAD )
+			setRequestedOrientation(Globals.HorizontalOrientation ? ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+		else
+			setRequestedOrientation(Globals.HorizontalOrientation ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 	}
 
 	private static DataDownloader downloader = null;
